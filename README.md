@@ -30,3 +30,28 @@ http://localhost:3001
 
 API Health:
 http://localhost:3001/health
+
+## Infrastructure
+
+### Start databases
+
+docker compose up -d
+
+### Check status
+
+docker compose ps
+
+### Stop
+
+docker compose down
+
+### Logs
+
+docker compose logs -f
+
+Service Port
+PostgreSQL 5433
+MongoDB 27017
+Redis 6379
+Elasticsearch 9200
+Milvus 19530
