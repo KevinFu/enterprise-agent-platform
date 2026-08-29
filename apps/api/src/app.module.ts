@@ -5,13 +5,14 @@ import postgresConfig, { PostgresConfig } from './config/postgres.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
-import { DocumentsController } from './documents/documents.controller';
+import { DocumentsModule } from './documents/documents.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
     HealthModule,
+    DocumentsModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: path.resolve(__dirname, '../../../.env'),
@@ -37,7 +38,7 @@ import { HealthController } from './health/health.controller';
       },
     }),
   ],
-  controllers: [AppController, HealthController, DocumentsController],
+  controllers: [AppController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}
