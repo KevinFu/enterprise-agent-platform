@@ -1,3 +1,10 @@
 {
-  "cSpell.words": ["langchain", "langgraph"]
+  "cSpell.words": [
+    "ADMINPASSWORD",
+    "ADMINUSERNAME",
+    "langchain",
+    "langgraph",
+    "milvus",
+    "pgadmin"
+  ]
 }
