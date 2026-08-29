@@ -1,8 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import SnowflakeId from 'snowflake-id';
 import { Document } from './document.entity';
 import { CreateDocumentDto } from './dto/create-document.dto';
+
+const snowflake = new SnowflakeId({
+  mid: Number(process.env.MACHINE_ID) || 1,
+  offset: 1704067200000, // 2024-01-01
+});
 
 @Injectable()
 export class DocumentsService {
@@ -14,7 +20,7 @@ export class DocumentsService {
   async create(createDocumentDto: CreateDocumentDto): Promise<Document> {
     const document = this.documentRepository.create({
       ...createDocumentDto,
-      id: this.generateId(),
+      id: snowflake.generate(),
       publishTime: createDocumentDto.publishTime
         ? new Date(createDocumentDto.publishTime)
         : null,
@@ -33,15 +39,5 @@ export class DocumentsService {
     return this.documentRepository.findOne({
       where: { id, deleted: false },
     });
-  }
-
-  /**
-   * 生成简单的数字 ID（时间戳 + 随机数）。
-   * 表 kh_document.id 是 BIGINT 主键，无自增序列，故在应用层生成。
-   */
-  private generateId(): string {
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000);
-    return `${timestamp}${random}`;
   }
 }
