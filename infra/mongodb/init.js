@@ -1,8 +1,8 @@
 db = db.getSiblingDB("knowledge_hub");
 
 db.createUser({
-  user: "knowledge_hub_user",
-  pwd: "knowledge_hub_password",
+  user: "root",
+  pwd: "123456",
   roles: [{ role: "readWrite", db: "knowledge_hub" }],
 });
 

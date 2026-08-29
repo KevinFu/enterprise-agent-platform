@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
 import { DocumentsModule } from './documents/documents.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { HealthController } from './health/health.controller';
 
 @Module({
@@ -36,6 +37,12 @@ import { HealthController } from './health/health.controller';
           synchronize: false,
         };
       },
+    }),
+    MongooseModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('MONGODB_URI') || 'mongodb://localhost:27017/knowledge_hub',
+      }),
     }),
   ],
   controllers: [AppController, HealthController],

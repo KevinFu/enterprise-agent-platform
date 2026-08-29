@@ -12,9 +12,15 @@ export class CreateDocumentDto {
   @MinLength(1)
   title: string;
 
+  /** 文档正文内容（写入 MongoDB） */
   @IsString()
   @MinLength(1)
-  contentId: string;
+  content: string;
+
+  /** 可选，不传则自动生成 */
+  @IsOptional()
+  @IsString()
+  contentId?: string;
 
   @IsOptional()
   @IsString()
