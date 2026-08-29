@@ -2,31 +2,63 @@ services:
   # Postgres
   postgres:
     image: postgres:16
+    container_name: knowledge_hub_postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5433:5432"
+      - 5433:5432
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./storage/postgres:/var/lib/postgresql/data
+      - ./infra/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: knowledge_hub_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - 8088:80
+    depends_on:
+      - postgres
 
   # MongoDB
   mongodb:
     image: mongo:7
+    container_name: knowledge_hub_mongodb
+    restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    networks:
+      - enterprise_agent
     ports:
       - 27017:27017
     volumes:
       - mongodb_data:/data/db
+  mongo-express:
+    image: mongo-express:1.0.2-20-alpine3.19
+    container_name: knowledge_hub_mongodb_express
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_INITDB_DATABASE}?authSource=admin
+    networks:
+      - enterprise_agent
+    ports:
+      - 8081:8081
+    depends_on:
+      - mongodb
 
   # Redis
   redis:
     image: redis:7.4.0
+    container_name: knowledge_hub_redis
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+    networks:
+      - enterprise_agent
     ports:
       - 6379:6379
     volumes:
@@ -34,51 +66,16 @@ services:
 
   # Elasticsearch
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.28
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.18.1
+    container_name: knowledge_hub_elasticsearch
     environment:
       - discovery.type=single-node
+    networks:
+      - enterprise_agent
     ports:
       - 9200:9200
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-
-  # Milvus standalone needs etcd + MinIO
-  etcd:
-    image: quay.io/coreos/etcd:v3.5.14
-    environment:
-      - ETCD_AUTO_COMPACTION_MODE=revision
-      - ETCD_AUTO_COMPACTION_RETENTION=1000
-      - ETCD_QUOTA_BACKEND_BYTES=4294967296
-      - ETCD_SNAPSHOT_COUNT=50000
-    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
-    volumes:
-      - etcd_data:/etcd
-
-  minio:
-    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
-    environment:
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
-    command: minio server /minio_data --console-address ":9001"
-    ports:
-      - 9000:9000
-      - 9001:9001
-    volumes:
-      - minio_data:/minio_data
-
-  milvus:
-    image: milvusdb/milvus:v2.5.2
-    command: ["milvus", "run", "standalone"]
-    environment:
-      ETCD_ENDPOINTS: etcd:2379
-      MINIO_ADDRESS: minio:9000
-    ports:
-      - 19530:19530
-    volumes:
-      - milvus_data:/var/lib/milvus
-    depends_on:
-      - etcd
-      - minio
 
 networks:
   enterprise_agent:
