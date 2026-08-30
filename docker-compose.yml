@@ -11,7 +11,7 @@ services:
       - 5433:5432
     volumes:
       - ./storage/postgres:/var/lib/postgresql/data
-      - ./infra/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./infra/postgres:/docker-entrypoint-initdb.d
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: knowledge_hub_pgadmin
@@ -37,7 +37,8 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - mongodb_data:/data/db
+      - ./storage/mongodb:/data/db
+      - ./infra/mongodb:/docker-entrypoint-initdb.d
   mongo-express:
     image: mongo-express:1.0.2-20-alpine3.19
     container_name: knowledge_hub_mongodb_express
