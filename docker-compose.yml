@@ -37,7 +37,7 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - ./storage/mongodb:/data/db
+      - mongodb_data:/data/db
       - ./infra/mongodb:/docker-entrypoint-initdb.d
   mongo-express:
     image: mongo-express:1.0.2-20-alpine3.19
